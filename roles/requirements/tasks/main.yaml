@@ -1,0 +1,53 @@
+- name: Ensure required system packages are present
+  apt:
+    name:
+      - python3
+      - python3-pip
+      - python3-venv
+    state: present
+    update_cache: true
+
+- name: Create a virtual environment for Ansible
+  ansible.builtin.command: python3 -m venv {{ venv_path }}
+  args:
+    creates: "{{ venv_path }}/bin/activate"
+
+- name: Upgrade pip inside virtualenv
+  ansible.builtin.command: "{{ venv_path }}/bin/pip install --upgrade pip"
+
+- name: Install latest Ansible in virtualenv
+  ansible.builtin.command: "{{ venv_path }}/bin/pip install --upgrade ansible"
+
+- name: Show installed Ansible version
+  ansible.builtin.command: "{{ venv_path }}/bin/ansible --version"
+  register: ansible_version_output
+
+- name: Display installed Ansible version
+  ansible.builtin.debug:
+    msg: "{{ ansible_version_output.stdout_lines }}"
+
+#
+# Install Ansible collections
+#
+
+- name: Install collections for ansible-galaxy
+  ansible.builtin.command: ansible-galaxy collection install ansible.posix
+
+- name: Install collections for community.kubernetes
+  ansible.builtin.command: ansible-galaxy collection install community.kubernetes
+
+#
+# Ansible configuration
+#
+
+- name: Ensure the ansible directory exists
+  ansible.builtin.file:
+    path: "/etc/ansible/"
+    state: directory
+    mode: "0755"
+
+- name: Generate ansible.cfg from template
+  ansible.builtin.template:
+    src: ansible_cfg.j2
+    dest: "/etc/ansible/ansible.cfg"
+    mode: "0644"
