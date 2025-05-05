@@ -4,6 +4,7 @@
       - python3
       - python3-pip
       - python3-venv
+      - python3-full
     state: present
     update_cache: true
 
@@ -17,6 +18,15 @@
 
 - name: Install latest Ansible in virtualenv
   ansible.builtin.command: "{{ venv_path }}/bin/pip install --upgrade ansible"
+
+- name: Install kubernetes in virtualenv
+  ansible.builtin.command: "{{ venv_path }}/bin/pip install kubernetes"
+
+- name: Install jsonpatch in virtualenv
+  ansible.builtin.command: "{{ venv_path }}/bin/pip install jsonpatch"
+
+- name: Install PyYAML in virtualenv
+  ansible.builtin.command: "{{ venv_path }}/bin/pip install PyYAML"
 
 - name: Show installed Ansible version
   ansible.builtin.command: "{{ venv_path }}/bin/ansible --version"
