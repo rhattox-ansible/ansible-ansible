@@ -1,4 +1,4 @@
-- name: Ensure required system packages are present
+- name: Install required system packages (python3, pip, venv)
   apt:
     name:
       - python3
@@ -8,31 +8,31 @@
     state: present
     update_cache: true
 
-- name: Create a virtual environment for Ansible
+- name: Create Python virtual environment for Ansible
   ansible.builtin.command: python3 -m venv {{ venv_path }}
   args:
     creates: "{{ venv_path }}/bin/activate"
 
-- name: Upgrade pip inside virtualenv
+- name: Upgrade pip in the Ansible virtual environment
   ansible.builtin.command: "{{ venv_path }}/bin/pip install --upgrade pip"
 
-- name: Install latest Ansible in virtualenv
+- name: Install or upgrade Ansible in the virtual environment
   ansible.builtin.command: "{{ venv_path }}/bin/pip install --upgrade ansible"
 
-- name: Install kubernetes in virtualenv
+- name: Install kubernetes Python package in the virtual environment
   ansible.builtin.command: "{{ venv_path }}/bin/pip install kubernetes"
 
-- name: Install jsonpatch in virtualenv
+- name: Install jsonpatch Python package in the virtual environment
   ansible.builtin.command: "{{ venv_path }}/bin/pip install jsonpatch"
 
-- name: Install PyYAML in virtualenv
+- name: Install PyYAML Python package in the virtual environment
   ansible.builtin.command: "{{ venv_path }}/bin/pip install PyYAML"
 
-- name: Show installed Ansible version
+- name: Retrieve installed Ansible version from virtual environment
   ansible.builtin.command: "{{ venv_path }}/bin/ansible --version"
   register: ansible_version_output
 
-- name: Display installed Ansible version
+- name: Output installed Ansible version
   ansible.builtin.debug:
     msg: "{{ ansible_version_output.stdout_lines }}"
 
@@ -40,23 +40,23 @@
 # Install Ansible collections
 #
 
-- name: Install collections for ansible-galaxy
+- name: Install ansible.posix collection via ansible-galaxy
   ansible.builtin.command: ansible-galaxy collection install ansible.posix
 
-- name: Install collections for community.kubernetes
+- name: Install community.kubernetes collection via ansible-galaxy
   ansible.builtin.command: ansible-galaxy collection install community.kubernetes
 
 #
 # Ansible configuration
 #
 
-- name: Ensure the ansible directory exists
+- name: Ensure /etc/ansible directory exists
   ansible.builtin.file:
     path: "/etc/ansible/"
     state: directory
     mode: "0755"
 
-- name: Generate ansible.cfg from template
+- name: Generate /etc/ansible/ansible.cfg from template
   ansible.builtin.template:
     src: ansible_cfg.j2
     dest: "/etc/ansible/ansible.cfg"
